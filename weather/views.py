@@ -21,16 +21,33 @@ class WeatherViewSet(viewsets.ViewSet):
             data = response.json()
             return False, data['error']
 
-        return True, {}
+        data = response.json()['forecast']['forecastday']
+        avg_list_per_day = [d['day']['avgtemp_c'] for d in data]
+        median = self.calculate_mean(avg_list_per_day)
+        average = self.calculate_avg(avg_list_per_day)
+        maximum = self.get_max(avg_list_per_day)
+        minimum = self.get_min(avg_list_per_day)
+        return True, {'average': average, 'median': median, 'maximum': maximum, "minimum": minimum}
 
-    def calculate_mean(self):
-        return 1
+    def calculate_mean(self, temps):
+        n = len(temps)
+        temps.sort()
+        
+        if n % 2 == 0:
+            median1 = temps[n//2]
+            median2 = temps[n//2 - 1]
+            median = (median1 + median2)/2
+        else:
+            median = temps[n//2]
+        return median
 
-    def calculate_avg(self):
-        return 1
+    def calculate_avg(self, temps):
+        n = len(temps)
+        temps_sum = sum(temps)
+        return temps_sum / n
 
-    def get_max(self):
-        return 1
+    def get_max(self, temps):
+        return max(temps)
 
-    def get_min(self):
-        return 1
+    def get_min(self, temps):
+        return min(temps)
